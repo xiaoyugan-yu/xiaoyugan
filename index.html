@@ -6,74 +6,64 @@
   <title>小鱼干的网站</title>
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.json" />
-  <link rel="icon" type="image/x-icon" href="/images/Favicon.svg" /
+  <link rel="icon" type="image/x-icon" href="/images/Favicon.svg" />
   <link rel="manifest" href="/site.webmanifest">
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header class="site-header">
     <div class="container">
-      <a class="logo" href="#">小鱼干的个人网站</a>
+      <a class="logo" href="index.html">小鱼干的个人网站</a>
       <button id="navToggle" class="nav-toggle" aria-label="打开导航">☰</button>
       <nav id="mainNav" class="main-nav">
-        <a href="#home">首页</a>
-        <a href="#about">关于</a>
-        <a href="#works">作品</a>
-        <a href="#contact">联系</a>
+        <a href="index.html">首页</a>
+        <a href="about.html">关于</a>
+        <a href="works.html">作品</a>
+        <a href="contact.html">联系</a>
       </nav>
     </div>
   </header>
 
   <main>
-    <section id="home" class="hero">
+    <section class="hero">
       <div class="container">
         <h1>欢迎来到我的网站</h1>
         <p>这里有我的作品。</p>
-        <a class="btn" href="#works">查看作品</a>
+        <a class="btn" href="works.html">查看作品</a>
       </div>
     </section>
 
-    <section id="about" class="container section">
+    <section class="container section">
       <h2>关于我</h2>
       <p>我是一个做点小项目的小学生，偶尔有有些好点子 。</p>
+      <a class="btn" href="about.html">了解更多</a>
     </section>
 
-    <section id="works" class="container section">
-      <h2>作品 （如果有问题，可以联系我）</h2>
+    <section class="container section">
+      <h2>最新作品</h2>
       <div class="grid">
         <article class="card">
           <h3>项目:小跳跃者</h3>
-          <p>一个跑酷游戏，链接：https://github.com/xiaoyugan-yu/Little-Jumper-Chinese-version-.git，可以下载，详情看简介。</p>
-        </article>
-        <article class="card">
-          <h3>项目 2</h3>
-          <p>未完成，有点bug。</p>
+          <p>一个跑酷游戏，可以下载，详情看简介。</p>
+          <a class="btn" href="works.html">查看所有作品</a>
         </article>
         <article class="card">
           <h3>项目 乒乓球</h3>
-          <p>一个简单的乒乓球游戏，链接：https://github.com/xiaoyugan-yu/Ping-Pong。</p>
+          <p>一个简单的乒乓球游戏。</p>
+          <a class="btn" href="works.html">查看所有作品</a>
+        </article>
+        <article class="card">
+          <h3>更多项目</h3>
+          <p>我还有其他项目在开发中，敬请期待！</p>
+          <a class="btn" href="contact.html">联系我</a>
         </article>
       </div>
     </section>
 
-    <section id="contact" class="container section">
-      <h2>联系我</h2>
-      <form id="contactForm">
-        <label>
-          姓名
-          <input type="text" name="name" required />
-        </label>
-        <label>
-          邮箱
-          <input type="email" name="email" required />
-        </label>
-        <label>
-          信息
-          <textarea name="message" rows="4" required></textarea>
-        </label>
-        <button type="submit" class="btn">发送</button>
-        <p id="formMsg" class="form-msg" aria-live="polite"></p>
-      </form>
+    <section class="container section">
+      <h2>联系方式</h2>
+      <p>如果你对我的作品感兴趣或有任何问题，欢迎联系我！</p>
+      <a class="btn" href="contact.html">发送消息</a>
     </section>
   </main>
 
