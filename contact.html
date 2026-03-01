@@ -1,69 +1,11 @@
-<!doctype html>
-<html lang="zh-CN">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>联系我 - 小鱼干的网站</title>
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-  <link rel="manifest" href="/manifest.json" />
-  <link rel="icon" type="image/x-icon" href="/images/Favicon.svg" />
-  <link rel="manifest" href="/site.webmanifest">
-  <link rel="stylesheet" href="styles.css" />
-</head>
-<body>
-  <header class="site-header">
-    <div class="container">
-      <a class="logo" href="index.html">小鱼干的个人网站</a>
-      <button id="navToggle" class="nav-toggle" aria-label="打开导航">☰</button>
-      <nav id="mainNav" class="main-nav">
-        <a href="index.html">首页</a>
-        <a href="about.html">关于</a>
-        <a href="works.html">作品</a>
-        <a href="contact.html">联系</a>
-      </nav>
-    </div>
-  </header>
-
-  <main>
-    <section class="container section">
-      <h1>联系我</h1>
-      <p>如果你有任何问题、建议或想法，欢迎联系我！</p>
-      
-      <h2>发送消息</h2>
-      <form id="contactForm">
-        <label>
-          姓名
-          <input type="text" name="name" required />
-        </label>
-        <label>
-          邮箱
-          <input type="email" name="email" required />
-        </label>
-        <label>
-          信息
-          <textarea name="message" rows="4" required></textarea>
-        </label>
-        <button type="submit" class="btn">发送</button>
-        <p id="formMsg" class="form-msg" aria-live="polite"></p>
-      </form>
-
-      <h2>其他联系方式</h2>
-      <ul>
-        <li><strong>邮箱：</strong> xuanming.yu@hotmail.com</li>
-        <li><strong>GitHub：</strong> <a href="https://github.com/xiaoyugan-yu" target="_blank">https://github.com/xiaoyugan-yu</a></li>
-      </ul>
-
-      <h2>关注我</h2>
-      <p>你也可以在 GitHub 上关注我，看看我的最新项目和更新！</p>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <div class="container">
-      <small>© 2026 小鱼干。保留所有权利。</small>
-    </div>
-  </footer>
-
-  <script src="script.js"></script>
-</body>
-</html>
+<form action="https://formsubmit.co/xuanming.yu@hotmail.com" method="POST">
+    <input type="hidden" name="captcha" value="your_captcha_value_here">
+    <input type="hidden" name="redirect" value="http://your_redirect_url_here">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" required>
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" required>
+    <label for="message">Message:</label>
+    <textarea id="message" name="message" required></textarea>
+    <button type="submit">Send</button>
+</form>
