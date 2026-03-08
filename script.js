@@ -1,22 +1,18 @@
-// Updated script.js to remove old mailto functionality
+// 简单交互：移动端导航
+document.getElementById('navToggle').addEventListener('click', function(){
+  document.getElementById('mainNav').classList.toggle('show');
+});
 
-function handleFormSubmit(e) {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    // Handle form submission logic here
-    // Assume success if submission is successful
-    showSuccessMessage();
-}
-
-function showSuccessMessage() {
-    const messageElement = document.createElement('div');
-    messageElement.innerText = 'Form submitted successfully!';
-    messageElement.style.color = 'green';
-    document.body.appendChild(messageElement);
-}
-
-// Example: Hook up the handleFormSubmit to a form
-const form = document.querySelector('form');
-if (form) {
-    form.addEventListener('submit', handleFormSubmit);
-}
+// 显示成功消息（如果从 FormSubmit 重定向回来）
+window.addEventListener('load', function(){
+  const urlParams = new URLSearchParams(window.location.search);
+  if(urlParams.get('success') === 'true'){
+    const msg = document.getElementById('formMsg');
+    if(msg){
+      msg.textContent = '✓ 邮件已成功发送！谢谢你的消息，我会尽快回复。';
+      msg.style.color = '#d1fae5';
+      // 清除 URL 中的参数
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }
+});
