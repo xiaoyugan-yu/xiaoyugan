@@ -30,7 +30,8 @@
       <p>如果你有任何问题、建议或想法，欢迎联系我！</p>
       
       <h2>发送消息</h2>
-      <form action="https://formsubmit.co/xuanming.yu@hotmail.com" method="POST">
+      <!-- 保持 FormSubmit，action 改成你的邮箱 -->
+      <form id="contactForm" action="https://formsubmit.co/xuanming.yu@hotmail.com" method="POST">
         <label>
           姓名
           <input type="text" name="name" required />
@@ -43,8 +44,12 @@
           信息
           <textarea name="message" rows="4" required></textarea>
         </label>
+
+        <!-- 关闭 FormSubmit 的内置 captcha（可选） -->
         <input type="hidden" name="_captcha" value="false">
+        <!-- 提交后重定向到带 success 参数的页面（便于显示前端提示） -->
         <input type="hidden" name="_next" value="https://xiaoyugan-yu.github.io/xiaoyugan/contact.html?success=true">
+
         <button type="submit" class="btn">发送</button>
         <p id="formMsg" class="form-msg" aria-live="polite"></p>
       </form>
