@@ -17,7 +17,14 @@ body{
   line-height:1.5;
 }
 .container{max-width:1000px;margin:0 auto;padding:1rem;}
-.site-header{background:transparent;padding:0.5rem 0;position:sticky;top:0;z-index:10}
+.site-header{
+  background: rgba(7, 16, 41, 0.8);
+  backdrop-filter: blur(10px);
+  padding:0.5rem 0;
+  position:sticky;
+  top:0;
+  z-index:10;
+}
 .site-header .container{display:flex;align-items:center;gap:1rem}
 .logo{font-weight:700;color:var(--white);text-decoration:none}
 .main-nav{margin-left:auto;display:flex;gap:1rem}
@@ -38,7 +45,17 @@ body{
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem}
 .card{background:rgba(255,255,255,0.03);padding:1rem;border-radius:8px}
 label{display:block;margin:0.5rem 0}
-input,textarea{width:100%;padding:.5rem;border-radius:6px;border:1px solid rgba(255,255,255,0.08);background:transparent;color:var(--white)}
+input,textarea{
+  width:100%;
+  padding:.5rem;
+  border-radius:6px;
+  border:1px solid rgba(255,255,255,0.08);
+  background:transparent;
+  color:var(--white);
+}
+input:invalid, textarea:invalid {
+  border-color: #f87171;
+}
 .form-msg{margin-top:.5rem;color:#d1fae5}
 
 /* footer */

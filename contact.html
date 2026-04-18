@@ -4,17 +4,14 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>联系我 - 小鱼干的网站</title>
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-  <link rel="manifest" href="/manifest.json" />
-  <link rel="icon" type="image/x-icon" href="/images/Favicon.svg" />
-  <link rel="manifest" href="/site.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="images/Favicon.svg" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header class="site-header">
     <div class="container">
       <a class="logo" href="index.html">小鱼干的个人网站</a>
-      <button id="navToggle" class="nav-toggle" aria-label="打开导航">☰</button>
+      <button id="navToggle" class="nav-toggle" aria-label="打开导航" aria-expanded="false">☰</button>
       <nav id="mainNav" class="main-nav">
         <a href="index.html">首页</a>
         <a href="about.html">关于</a>
@@ -30,7 +27,6 @@
       <p>如果你有任何问题、建议或想法，欢迎联系我！</p>
       
       <h2>发送消息</h2>
-      <!-- 保持 FormSubmit，action 改成你的邮箱 -->
       <form id="contactForm" action="https://formsubmit.co/xuanming.yu@hotmail.com" method="POST">
         <label>
           姓名
@@ -45,11 +41,8 @@
           <textarea name="message" rows="4" required></textarea>
         </label>
 
-        <!-- 关闭 FormSubmit 的内置 captcha（可选） -->
         <input type="hidden" name="_captcha" value="false">
-        <!-- 提交后重定向到带 success 参数的页面（便于显示前端提示） -->
-        <input type="hidden" name="_next" value="https://xiaoyugan-yu.github.io/xiaoyugan/contact.html?success=true">
-
+        <!-- _next 将通过 JS 动态设置，以适配不同域名 -->
         <button type="submit" class="btn">发送</button>
         <p id="formMsg" class="form-msg" aria-live="polite"></p>
       </form>
