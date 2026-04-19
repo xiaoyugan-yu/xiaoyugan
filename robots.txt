@@ -1,0 +1,6 @@
+# 允许所有搜索引擎爬取所有内容
+User-agent: *
+Allow: /
+
+# 指定网站地图（如果有的话，可以后续添加）
+# Sitemap: https://你的域名/sitemap.xml

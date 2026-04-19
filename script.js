@@ -1,4 +1,4 @@
-// 移动端导航：更好的可访问性
+// 移动端导航
 const navToggle = document.getElementById('navToggle');
 const mainNav = document.getElementById('mainNav');
 if (navToggle && mainNav) {
@@ -9,7 +9,7 @@ if (navToggle && mainNav) {
   });
 }
 
-// 动态设置表单的 _next 参数，确保重定向地址正确（解决硬编码问题）
+// 表单 _next 动态设置
 const contactForm = document.getElementById('contactForm');
 if (contactForm) {
   let nextInput = contactForm.querySelector('input[name="_next"]');
@@ -23,7 +23,7 @@ if (contactForm) {
   nextInput.value = currentUrl + '?success=true';
 }
 
-// 如果用户从 FormSubmit 重定向回来（?success=true），显示成功提示
+// 表单成功提示
 window.addEventListener('load', function () {
   try {
     const urlParams = new URLSearchParams(window.location.search);
@@ -42,13 +42,77 @@ window.addEventListener('load', function () {
   }
 });
 
-// ========== 动态更新时间（手动维护） ==========
-const lastUpdated = "2026年4月18日";  // 每次修改网站后记得更新这个日期
+// 动态更新时间
+const lastUpdated = "2026年4月18日";
 const footerSmall = document.querySelector('.site-footer small');
 if (footerSmall) {
   const originalText = footerSmall.innerHTML;
-  // 避免重复添加“最后更新”
   if (!originalText.includes('最后更新')) {
     footerSmall.innerHTML = originalText + ` | 最后更新：${lastUpdated}`;
   }
+}
+
+// 打字机效果
+const typedTitle = document.getElementById('typed-title');
+if (typedTitle) {
+  const phrases = [
+    "欢迎来到我的网站 🚀",
+    "这里有小鱼干的项目 💻",
+    "一起探索代码世界 ✨",
+    "创意无限，持续更新 📝"
+  ];
+  let phraseIndex = 0;
+  let charIndex = 0;
+  let isDeleting = false;
+  let currentText = '';
+
+  function typeEffect() {
+    const fullText = phrases[phraseIndex];
+    if (isDeleting) {
+      currentText = fullText.substring(0, charIndex - 1);
+      charIndex--;
+    } else {
+      currentText = fullText.substring(0, charIndex + 1);
+      charIndex++;
+    }
+    typedTitle.textContent = currentText;
+
+    if (!isDeleting && charIndex === fullText.length) {
+      isDeleting = true;
+      setTimeout(typeEffect, 1500);
+      return;
+    }
+    if (isDeleting && charIndex === 0) {
+      isDeleting = false;
+      phraseIndex = (phraseIndex + 1) % phrases.length;
+      setTimeout(typeEffect, 300);
+      return;
+    }
+    const speed = isDeleting ? 30 : 50;
+    setTimeout(typeEffect, speed);
+  }
+  typeEffect();
+}
+
+// ========== 深色/亮色模式切换 ==========
+const themeToggle = document.getElementById('themeToggle');
+if (themeToggle) {
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme) {
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    themeToggle.textContent = savedTheme === 'light' ? '🌙' : '☀️';
+  } else {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const defaultTheme = prefersDark ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', defaultTheme);
+    themeToggle.textContent = defaultTheme === 'light' ? '🌙' : '☀️';
+  }
+
+  themeToggle.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    themeToggle.textContent = newTheme === 'light' ? '🌙' : '☀️';
+  });
 }
