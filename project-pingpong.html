@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>乒乓球 - 小鱼干的网站</title>
+  <link rel="icon" type="image/svg+xml" href="images/Favicon.svg" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="logo" href="index.html">小鱼干的个人网站</a>
+      <button id="navToggle" class="nav-toggle" aria-label="打开导航" aria-expanded="false">☰</button>
+      <nav id="mainNav" class="main-nav">
+        <a href="index.html">首页</a>
+        <a href="about.html">关于</a>
+        <a href="works.html">作品</a>
+        <a href="contact.html">联系</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="container section">
+      <h1>🏓 乒乓球 (Ping Pong)</h1>
+      <p>一个简单的双人乒乓球游戏，也可以和电脑对战。</p>
+      
+      <h2>📷 项目截图</h2>
+      <p>暂无
+      
+      <h2>🎮 玩法说明</h2>
+      <ul>
+        <li>左侧玩家：使用 <kbd>W</kbd> / <kbd>S</kbd> 上下移动</li>
+        <li>右侧玩家：使用 <kbd>↑</kbd> / <kbd>↓</kbd> 上下移动</li>
+        <li>先得到 7 分的玩家获胜</li>
+        <li>球速会随着回合数增加而变快</li>
+      </ul>
+      
+      <h2>🔗 链接</h2>
+      <ul>
+        <li><a href="https://github.com/xiaoyugan-yu/Ping-Pong" target="_blank">GitHub 仓库</a></li>
+        <li><a href="#">在线试玩（暂未部署）</a></li>
+      </ul>
+      
+      <h2>📝 开发心得</h2>
+      <p>这个游戏是用 Python 的 Turtle 模块写的，锻炼了我对坐标移动和碰撞检测的理解。未来计划添加 AI 对手和计分板动画。</p>
+      
+      <!-- 评论区 -->
+      <h2>💬 留言与建议</h2>
+      <p>欢迎在下方评论区留下你的想法～（需要 GitHub 账号登录）</p>
+      <script src="https://utteranc.es/client.js"
+        repo="xiaoyugan-yu/xiaoyugan"
+        issue-term="pathname"
+        theme="github-dark"
+        crossorigin="anonymous"
+        async>
+</script>
+      
+      <div style="margin-top: 2rem;">
+        <a class="btn" href="works.html">← 返回作品列表</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <small>© 2026 小鱼干。保留所有权利。</small>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
