@@ -50,13 +50,42 @@
       
       <h2>💬 留言与建议</h2>
       <p>欢迎在下方评论区留下你的想法～（需要 GitHub 账号登录）</p>
-     <script src="https://utteranc.es/client.js"
-        repo="xiaoyugan-yu/xiaoyugan"
-        issue-term="pathname"
-        theme="github-dark"
-        crossorigin="anonymous"
-        async>
-</script>
+     <!-- 新评论系统容器 -->
+<div id="comment-app">
+  <div id="comment-status"></div>
+
+  <!-- 未登录面板 -->
+  <div id="login-register-panel">
+    <h3>发表评论请先登录</h3>
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+      <div style="flex:1; min-width: 200px;">
+        <h4>登录</h4>
+        <input type="text" id="login-username" placeholder="用户名" class="comment-input" />
+        <input type="password" id="login-password" placeholder="密码" class="comment-input" />
+        <button id="login-btn" class="btn">登录</button>
+      </div>
+      <div style="flex:1; min-width: 200px;">
+        <h4>注册</h4>
+        <input type="text" id="reg-username" placeholder="用户名" class="comment-input" />
+        <input type="password" id="reg-password" placeholder="密码" class="comment-input" />
+        <button id="register-btn" class="btn">注册</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 已登录面板 -->
+  <div id="loggedin-panel" style="display: none;">
+    <p>欢迎，<span id="current-username"></span>！ 
+       <button id="logout-btn" class="btn" style="background: #6c757d;">登出</button>
+    </p>
+    <textarea id="new-comment" rows="3" placeholder="写下你的评论..." style="width: 100%; margin-bottom: 0.5rem;"></textarea>
+    <button id="submit-comment" class="btn">发表评论</button>
+  </div>
+
+  <!-- 评论列表 -->
+  <h3>最新评论</h3>
+  <div id="comments-list" style="margin-top: 1rem;"></div>
+</div>
       
       <div style="margin-top: 2rem;">
         <a class="btn" href="works.html">← 返回作品列表</a>
