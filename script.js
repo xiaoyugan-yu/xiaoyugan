@@ -152,8 +152,8 @@ if (themeToggle) {
   });
 }
 
-// ========== 新评论系统（替换 Utterances） ==========
-const API_BASE = 'http://127.0.0.1:5000';   // 本地后端地址，部署后修改
+// ========== 评论系统（带跳转到独立登录页） ==========
+cconst API_BASE = 'https://xiaoyugan.pythonanywhere.com';
 let authToken = localStorage.getItem('access_token');
 let currentUsername = '';
 
@@ -231,74 +231,47 @@ async function updateUIByAuth() {
       if (res.ok) {
         const user = await res.json();
         currentUsername = user.username;
-        document.getElementById('login-register-panel').style.display = 'none';
-        document.getElementById('loggedin-panel').style.display = 'block';
-        document.getElementById('current-username').innerText = currentUsername;
+        const loggedinPanel = document.getElementById('loggedin-panel');
+        if (loggedinPanel) {
+          loggedinPanel.style.display = 'block';
+          document.getElementById('current-username').innerText = currentUsername;
+        }
         loadComments();
+        return;
       } else {
         throw new Error();
       }
     } catch {
       localStorage.removeItem('access_token');
       authToken = null;
-      document.getElementById('login-register-panel').style.display = 'block';
-      document.getElementById('loggedin-panel').style.display = 'none';
-      loadComments();
     }
-  } else {
-    document.getElementById('login-register-panel').style.display = 'block';
-    document.getElementById('loggedin-panel').style.display = 'none';
-    loadComments();
   }
+  
+  // 未登录状态：隐藏发表评论面板，显示登录提示
+  const loggedinPanel = document.getElementById('loggedin-panel');
+  if (loggedinPanel) loggedinPanel.style.display = 'none';
+  
+  const commentApp = document.getElementById('comment-app');
+  if (commentApp && !document.getElementById('login-prompt')) {
+    const promptDiv = document.createElement('div');
+    promptDiv.id = 'login-prompt';
+    promptDiv.innerHTML = `
+      <div style="text-align: center; padding: 2rem; background: var(--card-bg); border-radius: 12px; margin-top: 1rem;">
+        <p>📝 想要发表评论？请先登录</p>
+        <a href="account.html" class="btn">去登录 / 注册</a>
+      </div>
+    `;
+    commentApp.appendChild(promptDiv);
+  }
+  loadComments();
 }
 
-// 注册
-document.getElementById('register-btn')?.addEventListener('click', async () => {
-  const username = document.getElementById('reg-username').value.trim();
-  const password = document.getElementById('reg-password').value;
-  if (!username || !password) return showCommentStatus('用户名和密码不能为空', true);
-  try {
-    const res = await fetch(`${API_BASE}/api/register`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      showCommentStatus('注册成功，请登录');
-      document.getElementById('reg-username').value = '';
-      document.getElementById('reg-password').value = '';
-    } else {
-      showCommentStatus(data.msg || '注册失败', true);
-    }
-  } catch { showCommentStatus('网络错误', true); }
-});
-
-// 登录
-document.getElementById('login-btn')?.addEventListener('click', async () => {
-  const username = document.getElementById('login-username').value.trim();
-  const password = document.getElementById('login-password').value;
-  if (!username || !password) return showCommentStatus('用户名和密码不能为空', true);
-  try {
-    const res = await fetch(`${API_BASE}/api/login`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      authToken = data.access_token;
-      localStorage.setItem('access_token', authToken);
-      showCommentStatus('登录成功');
-      updateUIByAuth();
-      document.getElementById('login-username').value = '';
-      document.getElementById('login-password').value = '';
-    } else {
-      showCommentStatus(data.msg || '登录失败', true);
-    }
-  } catch { showCommentStatus('网络错误', true); }
-});
-
-// 发表评论
+// 发表评论（需要登录）
 document.getElementById('submit-comment')?.addEventListener('click', async () => {
+  if (!authToken) {
+    window.location.href = 'account.html';
+    return;
+  }
   const content = document.getElementById('new-comment').value.trim();
   if (!content) return showCommentStatus('评论内容不能为空', true);
   const res = await apiCall('/api/comments', {
@@ -322,7 +295,7 @@ document.getElementById('logout-btn')?.addEventListener('click', () => {
   updateUIByAuth();
 });
 
-// 启动评论系统（等待 DOM 加载）
+// 启动评论系统
 if (document.getElementById('comment-app')) {
   updateUIByAuth();
 }

@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>登录/注册 - 小鱼干的网站</title>
+  <link rel="icon" type="image/svg+xml" href="images/Favicon.svg" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .account-container {
+      max-width: 500px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: var(--card-bg);
+      border-radius: 16px;
+    }
+    .account-tabs {
+      display: flex;
+      gap: 1rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom: 2px solid var(--accent);
+    }
+    .account-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .account-form input {
+      padding: 0.8rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+    }
+    .form-message {
+      margin-top: 0.5rem;
+      padding: 0.5rem;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .form-message.error { background: rgba(248,113,113,0.2); color: #f87171; }
+    .form-message.success { background: rgba(134,239,172,0.2); color: #86efac; }
+    .back-link { text-align: center; margin-top: 1.5rem; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="logo" href="index.html">小鱼干的个人网站</a>
+      <button id="navToggle" class="nav-toggle">☰</button>
+      <nav id="mainNav" class="main-nav">
+        <a href="index.html">首页</a>
+        <a href="about.html">关于</a>
+        <a href="works.html">作品</a>
+        <a href="contact.html">联系</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="account-container">
+      <div class="account-tabs">
+        <button id="loginTab" class="tab-btn active">登录</button>
+        <button id="registerTab" class="tab-btn">注册</button>
+      </div>
+
+      <div id="loginForm" class="account-form">
+        <input type="text" id="login-username" placeholder="用户名" />
+        <input type="password" id="login-password" placeholder="密码" />
+        <button id="login-submit" class="btn">登录</button>
+        <div id="login-message" class="form-message"></div>
+      </div>
+
+      <div id="registerForm" class="account-form" style="display: none;">
+        <input type="text" id="reg-username" placeholder="用户名" />
+        <input type="password" id="reg-password" placeholder="密码" />
+        <button id="register-submit" class="btn">注册</button>
+        <div id="register-message" class="form-message"></div>
+      </div>
+
+      <div class="back-link">
+        <a href="javascript:history.back()">← 返回</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <small>© 2026 小鱼干。保留所有权利。</small>
+    </div>
+  </footer>
+
+  <script>
+    const API_BASE = 'https://xiaoyugan.pythonanywhere.com';
+    let authToken = localStorage.getItem('access_token');
+    if (authToken) window.location.href = document.referrer || 'index.html';
+
+    // 标签切换
+    document.getElementById('loginTab').addEventListener('click', () => {
+      document.getElementById('loginTab').classList.add('active');
+      document.getElementById('registerTab').classList.remove('active');
+      document.getElementById('loginForm').style.display = 'flex';
+      document.getElementById('registerForm').style.display = 'none';
+    });
+    document.getElementById('registerTab').addEventListener('click', () => {
+      document.getElementById('registerTab').classList.add('active');
+      document.getElementById('loginTab').classList.remove('active');
+      document.getElementById('registerForm').style.display = 'flex';
+      document.getElementById('loginForm').style.display = 'none';
+    });
+
+    function showMessage(el, msg, isError = true) {
+      el.textContent = msg;
+      el.className = `form-message ${isError ? 'error' : 'success'}`;
+      setTimeout(() => { el.textContent = ''; el.className = 'form-message'; }, 3000);
+    }
+
+    // 注册
+    document.getElementById('register-submit').addEventListener('click', async () => {
+      const username = document.getElementById('reg-username').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const msgDiv = document.getElementById('register-message');
+      if (!username || !password) return showMessage(msgDiv, '用户名和密码不能为空');
+      if (password.length < 4) return showMessage(msgDiv, '密码至少4个字符');
+
+      try {
+        const res = await fetch(`${API_BASE}/api/register`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showMessage(msgDiv, '注册成功！请登录', false);
+          document.getElementById('reg-username').value = '';
+          document.getElementById('reg-password').value = '';
+          document.getElementById('loginTab').click();
+        } else {
+          showMessage(msgDiv, data.msg || '注册失败');
+        }
+      } catch {
+        showMessage(msgDiv, '网络错误，后端是否运行？');
+      }
+    });
+
+    // 登录
+    document.getElementById('login-submit').addEventListener('click', async () => {
+      const username = document.getElementById('login-username').value.trim();
+      const password = document.getElementById('login-password').value;
+      const msgDiv = document.getElementById('login-message');
+      if (!username || !password) return showMessage(msgDiv, '用户名和密码不能为空');
+
+      try {
+        const res = await fetch(`${API_BASE}/api/login`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          localStorage.setItem('access_token', data.access_token);
+          showMessage(msgDiv, '登录成功！跳转中...', false);
+          setTimeout(() => { window.location.href = document.referrer || 'index.html'; }, 1000);
+        } else {
+          showMessage(msgDiv, data.msg || '登录失败');
+        }
+      } catch {
+        showMessage(msgDiv, '网络错误，后端是否运行？');
+      }
+    });
+  </script>
+</body>
+</html>
