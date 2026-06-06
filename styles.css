@@ -42,12 +42,12 @@ body {
 .container { max-width: 1000px; margin: 0 auto; padding: 1rem; }
 
 .site-header {
-  background: rgba(var(--bg-start-rgb), 0.8);
-  backdrop-filter: blur(10px);
-  padding: 0.5rem 0;
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  .site-header {
+  background: rgba(7, 16, 41, 0.8);
+}
+[data-theme="light"] .site-header {
+  background: rgba(240, 244, 248, 0.9);
+}
 }
 /* 因为背景色使用了变量，需要额外定义 RGB 值用于透明背景，但为了简化，直接使用背景色变量加透明度 */
 [data-theme="light"] .site-header {

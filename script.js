@@ -153,7 +153,7 @@ if (themeToggle) {
 }
 
 // ========== 评论系统（带跳转到独立登录页） ==========
-cconst API_BASE = 'https://xiaoyugan.pythonanywhere.com';
+const API_BASE = 'https://xiaoyugan.pythonanywhere.com';
 let authToken = localStorage.getItem('access_token');
 let currentUsername = '';
 
