@@ -155,29 +155,44 @@
     });
 
     // 登录
-    document.getElementById('login-submit').addEventListener('click', async () => {
-      const username = document.getElementById('login-username').value.trim();
-      const password = document.getElementById('login-password').value;
-      const msgDiv = document.getElementById('login-message');
-      if (!username || !password) return showMessage(msgDiv, '用户名和密码不能为空');
+document.getElementById('login-submit').addEventListener('click', async () => {
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+  const msgDiv = document.getElementById('login-message');
+  if (!username || !password) return showMessage(msgDiv, '用户名和密码不能为空');
 
-      try {
-        const res = await fetch(`${API_BASE}/api/login`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password })
-        });
-        const data = await res.json();
-        if (res.ok) {
-          localStorage.setItem('access_token', data.access_token);
-          showMessage(msgDiv, '登录成功！跳转中...', false);
-          setTimeout(() => { window.location.href = document.referrer || 'index.html'; }, 1000);
-        } else {
-          showMessage(msgDiv, data.msg || '登录失败');
-        }
-      } catch {
-        showMessage(msgDiv, '网络错误，后端是否运行？');
-      }
+  try {
+    const res = await fetch(`${API_BASE}/api/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
     });
+    const data = await res.json();
+    if (res.ok) {
+      const token = data.access_token;
+      
+      // 存到 localStorage
+      localStorage.setItem('access_token', token);
+      
+      // 存到 Cookie（Flask-Admin 需要）
+      document.cookie = `access_token=${token}; path=/; max-age=86400; SameSite=Lax`;
+      
+      showMessage(msgDiv, '登录成功！', false);
+      setTimeout(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('from') === 'admin') {
+          window.location.href = 'https://xiaoyugan.pythonanywhere.com/admin';
+        } else {
+          window.location.href = document.referrer || 'index.html';
+        }
+      }, 1000);
+    } else {
+      showMessage(msgDiv, data.msg || '登录失败');
+    }
+  } catch {
+    showMessage(msgDiv, '网络错误，后端是否运行？');
+  }
+});
   </script>
 </body>
 </html>
