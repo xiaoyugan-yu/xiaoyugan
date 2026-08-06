@@ -104,8 +104,6 @@
 
   <script>
     const API_BASE = 'https://xiaoyugan.pythonanywhere.com';
-    let authToken = localStorage.getItem('access_token');
-    if (authToken) window.location.href = document.referrer || 'index.html';
 
     // 标签切换
     document.getElementById('loginTab').addEventListener('click', () => {
@@ -127,7 +125,7 @@
       setTimeout(() => { el.textContent = ''; el.className = 'form-message'; }, 3000);
     }
 
-    // 注册
+    // ========== 注册 ==========
     document.getElementById('register-submit').addEventListener('click', async () => {
       const username = document.getElementById('reg-username').value.trim();
       const password = document.getElementById('reg-password').value;
@@ -137,7 +135,8 @@
 
       try {
         const res = await fetch(`${API_BASE}/api/register`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password })
         });
         const data = await res.json();
@@ -154,40 +153,45 @@
       }
     });
 
-    // 登录
-document.getElementById('login-submit').addEventListener('click', async () => {
-  const username = document.getElementById('login-username').value.trim();
-  const password = document.getElementById('login-password').value;
-  const msgDiv = document.getElementById('login-message');
-  if (!username || !password) return showMessage(msgDiv, '用户名和密码不能为空');
-
-  try {
-    const res = await fetch(`${API_BASE}/api/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',  // ← 关键：携带 Cookie
-      body: JSON.stringify({ username, password })
-    });
-    const data = await res.json();
-    if (res.ok) {
-      // 后端已经设置了 Cookie，不需要前端再设置
-      showMessage(msgDiv, '登录成功！', false);
-      setTimeout(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('from') === 'admin') {
-          window.location.href = 'https://xiaoyugan.pythonanywhere.com/admin';
-        } else {
-          window.location.href = document.referrer || 'index.html';
+    // ========== 登录（修复版） ==========
+    // 使用正确的 id 选择器
+    const loginBtn = document.getElementById('login-submit');
+    if (loginBtn) {
+      loginBtn.addEventListener('click', async function() {
+        const username = document.getElementById('login-username').value.trim();
+        const password = document.getElementById('login-password').value;
+        const msgDiv = document.getElementById('login-message');
+        
+        if (!username || !password) {
+          return showMessage(msgDiv, '请输入用户名和密码');
         }
-      }, 1000);
+
+        try {
+          const res = await fetch(`${API_BASE}/api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ username, password })
+          });
+          const data = await res.json();
+          
+          if (res.ok) {
+            showMessage(msgDiv, '登录成功！正在跳转...', false);
+            // 延迟1秒后跳转到后台
+            setTimeout(() => {
+              window.location.href = 'https://xiaoyugan.pythonanywhere.com/admin';
+            }, 1000);
+          } else {
+            showMessage(msgDiv, data.msg || '登录失败');
+          }
+        } catch (err) {
+          console.error('登录错误:', err);
+          showMessage(msgDiv, '网络错误，请检查后端是否运行');
+        }
+      });
     } else {
-      showMessage(msgDiv, data.msg || '登录失败');
+      console.error('❌ 找不到登录按钮 #login-submit');
     }
-  } catch (err) {
-    console.error('登录错误:', err);
-    showMessage(msgDiv, '网络错误，后端是否运行？');
-  }
-});
   </script>
 </body>
 </html>
