@@ -77,7 +77,7 @@
       </div>
 
       <div id="loginForm" class="account-form">
-        <input type="text" id="login-username" placeholder="用户名" value="yxm" />
+        <input type="text" id="login-username" placeholder="用户名" />
         <input type="password" id="login-password" placeholder="密码" />
         <button id="login-submit" class="btn">登录</button>
         <div id="login-message" class="form-message"></div>
@@ -103,7 +103,6 @@
   </footer>
 
   <script>
-    // ========== 所有代码都在这里 ==========
     const API_BASE = 'https://xiaoyugan.pythonanywhere.com';
 
     function showMessage(el, msg, isError = true) {
@@ -113,26 +112,20 @@
     }
 
     // 标签切换
-    const loginTab = document.getElementById('loginTab');
-    const registerTab = document.getElementById('registerTab');
-    const loginForm = document.getElementById('loginForm');
-    const registerForm = document.getElementById('registerForm');
-
-    loginTab.addEventListener('click', () => {
-      loginTab.classList.add('active');
-      registerTab.classList.remove('active');
-      loginForm.style.display = 'flex';
-      registerForm.style.display = 'none';
+    document.getElementById('loginTab').addEventListener('click', () => {
+      document.getElementById('loginTab').classList.add('active');
+      document.getElementById('registerTab').classList.remove('active');
+      document.getElementById('loginForm').style.display = 'flex';
+      document.getElementById('registerForm').style.display = 'none';
+    });
+    document.getElementById('registerTab').addEventListener('click', () => {
+      document.getElementById('registerTab').classList.add('active');
+      document.getElementById('loginTab').classList.remove('active');
+      document.getElementById('registerForm').style.display = 'flex';
+      document.getElementById('loginForm').style.display = 'none';
     });
 
-    registerTab.addEventListener('click', () => {
-      registerTab.classList.add('active');
-      loginTab.classList.remove('active');
-      registerForm.style.display = 'flex';
-      loginForm.style.display = 'none';
-    });
-
-    // ========== 注册 ==========
+    // 注册
     document.getElementById('register-submit').addEventListener('click', async () => {
       const username = document.getElementById('reg-username').value.trim();
       const password = document.getElementById('reg-password').value;
@@ -151,7 +144,7 @@
           showMessage(msgDiv, '注册成功！请登录', false);
           document.getElementById('reg-username').value = '';
           document.getElementById('reg-password').value = '';
-          loginTab.click();
+          document.getElementById('loginTab').click();
         } else {
           showMessage(msgDiv, data.msg || '注册失败');
         }
@@ -160,13 +153,8 @@
       }
     });
 
-    // ========== 登录 ==========
-    const loginBtn = document.getElementById('login-submit');
-    console.log('登录按钮已找到:', loginBtn);
-
-    loginBtn.addEventListener('click', async function() {
-      console.log('登录按钮被点击！');
-      
+    // ========== 登录（使用 location.replace 强制跳转） ==========
+    document.getElementById('login-submit').addEventListener('click', async function() {
       const username = document.getElementById('login-username').value.trim();
       const password = document.getElementById('login-password').value;
       const msgDiv = document.getElementById('login-message');
@@ -174,8 +162,6 @@
       if (!username || !password) {
         return showMessage(msgDiv, '请输入用户名和密码');
       }
-
-      console.log('正在登录:', username);
 
       try {
         const res = await fetch(`${API_BASE}/api/login`, {
@@ -189,9 +175,10 @@
         
         if (res.ok) {
           showMessage(msgDiv, '登录成功！正在跳转...', false);
+          // 使用 location.replace 强制跳转
           setTimeout(() => {
-            window.location.href = 'https://xiaoyugan.pythonanywhere.com/admin';
-          }, 1000);
+            window.location.replace('https://xiaoyugan.pythonanywhere.com/admin');
+          }, 800);
         } else {
           showMessage(msgDiv, data.msg || '登录失败');
         }
