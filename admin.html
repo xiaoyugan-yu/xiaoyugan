@@ -4,17 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>后台管理 - 小鱼干的网站</title>
+    <link rel="icon" type="image/svg+xml" href="images/Favicon.svg">
     <link rel="stylesheet" href="styles.css">
     <style>
         .admin-container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 2rem auto;
             padding: 1rem;
         }
         .admin-card {
             background: var(--card-bg);
-            padding: 1rem;
-            border-radius: 8px;
+            padding: 1.2rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+        }
+        .admin-card h2 {
+            margin-top: 0;
             margin-bottom: 1rem;
         }
         .admin-table {
@@ -23,7 +29,7 @@
             font-size: 0.9rem;
         }
         .admin-table th, .admin-table td {
-            padding: 0.5rem;
+            padding: 0.6rem 0.8rem;
             border: 1px solid var(--border);
             text-align: left;
         }
@@ -41,6 +47,7 @@
             padding: 0.2rem 0.6rem;
             border-radius: 4px;
             cursor: pointer;
+            font-size: 0.8rem;
         }
         .btn-danger:hover {
             background: #dc2626;
@@ -52,6 +59,7 @@
             padding: 0.2rem 0.6rem;
             border-radius: 4px;
             cursor: pointer;
+            font-size: 0.8rem;
         }
         .btn-success:hover {
             background: #16a34a;
@@ -63,6 +71,7 @@
             padding: 0.2rem 0.6rem;
             border-radius: 4px;
             cursor: pointer;
+            font-size: 0.8rem;
         }
         .btn-warning:hover {
             background: #d97706;
@@ -74,9 +83,6 @@
             margin-bottom: 1rem;
             flex-wrap: wrap;
             gap: 0.5rem;
-        }
-        .nav-bar a {
-            color: var(--accent);
         }
         .loading {
             text-align: center;
@@ -102,6 +108,63 @@
             border-radius: 999px;
             font-size: 0.7rem;
         }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+        .stat-card {
+            padding: 0.8rem;
+            border-radius: 8px;
+            text-align: center;
+            color: white;
+        }
+        .stat-card .number {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        .stat-card .label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        .stat-blue { background: var(--accent); }
+        .stat-green { background: #22c55e; }
+        .stat-orange { background: #f59e0b; }
+        .stat-purple { background: #8b5cf6; }
+        .stat-red { background: #ef4444; }
+        .trend-chart {
+            display: flex;
+            gap: 3px;
+            align-items: flex-end;
+            height: 100px;
+            overflow-x: auto;
+            padding: 0.5rem 0;
+            margin-top: 0.5rem;
+        }
+        .trend-bar-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            min-width: 20px;
+        }
+        .trend-bar {
+            background: var(--accent);
+            width: 100%;
+            border-radius: 2px 2px 0 0;
+            min-height: 2px;
+            transition: height 0.3s ease;
+        }
+        .trend-date {
+            font-size: 0.5rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .trend-count {
+            font-size: 0.5rem;
+            color: var(--text-muted);
+        }
         @media (max-width: 700px) {
             .admin-table {
                 font-size: 0.7rem;
@@ -109,9 +172,8 @@
             .admin-table th, .admin-table td {
                 padding: 0.3rem;
             }
-            .nav-bar {
-                flex-direction: column;
-                align-items: stretch;
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
@@ -140,16 +202,47 @@
                 </div>
             </div>
 
-            <div id="loginRequired" style="display: none; text-align: center; padding: 3rem; background: var(--card-bg); border-radius: 8px;">
+            <div id="loginRequired" style="display: none; text-align: center; padding: 3rem; background: var(--card-bg); border-radius: 12px;">
                 <p>🔒 请先登录</p>
                 <p style="margin-top: 1rem;"><a href="account.html" class="btn">去登录</a></p>
             </div>
 
-            <div id="notAdmin" style="display: none; text-align: center; padding: 3rem; background: var(--card-bg); border-radius: 8px;">
+            <div id="notAdmin" style="display: none; text-align: center; padding: 3rem; background: var(--card-bg); border-radius: 12px;">
                 <p>❌ 您不是管理员，无权访问后台</p>
             </div>
 
             <div id="adminContent">
+                <!-- 访问统计 -->
+                <div class="admin-card">
+                    <h2>📊 访问统计</h2>
+                    <div class="stats-grid" id="statsOverview">
+                        <div class="stat-card stat-blue">
+                            <div class="number" id="statTotal">-</div>
+                            <div class="label">总访问量</div>
+                        </div>
+                        <div class="stat-card stat-green">
+                            <div class="number" id="statToday">-</div>
+                            <div class="label">今日访问</div>
+                        </div>
+                        <div class="stat-card stat-orange">
+                            <div class="number" id="statYesterday">-</div>
+                            <div class="label">昨日访问</div>
+                        </div>
+                        <div class="stat-card stat-purple">
+                            <div class="number" id="statUnique">-</div>
+                            <div class="label">独立访客</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <h4 style="margin: 0 0 0.3rem 0;">📈 最近30天趋势</h4>
+                        <div class="trend-chart" id="trendChart"></div>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <h4 style="margin: 0 0 0.3rem 0;">📄 热门页面</h4>
+                        <div id="pageStats" style="font-size: 0.9rem;"></div>
+                    </div>
+                </div>
+
                 <!-- 用户管理 -->
                 <div class="admin-card">
                     <h2>👤 用户管理</h2>
@@ -179,16 +272,12 @@
             return localStorage.getItem('access_token');
         }
 
-        function redirectToLogin() {
-            window.location.href = 'account.html?from=admin';
-        }
-
         async function checkAuth() {
             const token = getToken();
             if (!token) {
                 document.getElementById('loginRequired').style.display = 'block';
                 document.getElementById('adminContent').style.display = 'none';
-                return false;
+                return;
             }
 
             try {
@@ -204,25 +293,87 @@
                         document.getElementById('loginRequired').style.display = 'none';
                         document.getElementById('notAdmin').style.display = 'block';
                         document.getElementById('adminContent').style.display = 'none';
-                        return false;
+                        return;
                     }
 
                     document.getElementById('loginRequired').style.display = 'none';
                     document.getElementById('notAdmin').style.display = 'none';
                     document.getElementById('adminContent').style.display = 'block';
+                    
+                    loadStats();
+                    loadPageStats();
                     loadUsers();
                     loadComments();
-                    return true;
                 } else {
                     throw new Error('认证失败');
                 }
             } catch (err) {
                 document.getElementById('loginRequired').style.display = 'block';
                 document.getElementById('adminContent').style.display = 'none';
-                return false;
             }
         }
 
+        // ========== 加载统计数据 ==========
+        async function loadStats() {
+            const token = getToken();
+            try {
+                const res = await fetch(`${API_BASE}/api/stats/overview`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('statTotal').textContent = data.total_visits;
+                    document.getElementById('statToday').textContent = data.today_visits;
+                    document.getElementById('statYesterday').textContent = data.yesterday_visits;
+                    document.getElementById('statUnique').textContent = data.unique_visitors;
+                }
+
+                const res2 = await fetch(`${API_BASE}/api/stats/daily`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res2.ok) {
+                    const data = await res2.json();
+                    const maxCount = Math.max(...data.map(d => d.count), 1);
+                    const chart = document.getElementById('trendChart');
+                    chart.innerHTML = data.map(d => `
+                        <div class="trend-bar-wrapper">
+                            <div class="trend-bar" style="height: ${(d.count / maxCount) * 80}px;"></div>
+                            <div class="trend-date">${d.date.slice(5)}</div>
+                            <div class="trend-count">${d.count}</div>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error('加载统计失败:', err);
+            }
+        }
+
+        async function loadPageStats() {
+            const token = getToken();
+            try {
+                const res = await fetch(`${API_BASE}/api/stats/pages`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    const container = document.getElementById('pageStats');
+                    if (data.length === 0) {
+                        container.innerHTML = '<div class="empty">暂无数据</div>';
+                        return;
+                    }
+                    container.innerHTML = data.map(p => 
+                        `<div style="display: flex; justify-content: space-between; padding: 0.2rem 0; border-bottom: 1px solid var(--border);">
+                            <span>${p.path}</span>
+                            <span style="color: var(--accent); font-weight: bold;">${p.count}</span>
+                        </div>`
+                    ).join('');
+                }
+            } catch (err) {
+                console.error('加载页面统计失败:', err);
+            }
+        }
+
+        // ========== 加载用户 ==========
         async function loadUsers() {
             const token = getToken();
             const container = document.getElementById('userList');
@@ -275,6 +426,7 @@
             }
         }
 
+        // ========== 加载评论 ==========
         async function loadComments() {
             const token = getToken();
             const container = document.getElementById('commentList');
@@ -322,7 +474,7 @@
             }
         }
 
-        // 切换管理员
+        // ========== 管理操作 ==========
         async function toggleAdmin(userId, currentStatus) {
             if (!confirm(`确定要${currentStatus ? '撤销' : '设为'}该用户的管理员权限吗？`)) return;
             const token = getToken();
@@ -343,7 +495,6 @@
             }
         }
 
-        // 管理员删除评论
         async function adminDeleteComment(id) {
             if (!confirm('确定要删除这条评论吗？')) return;
             const token = getToken();
@@ -364,7 +515,6 @@
             }
         }
 
-        // 删除用户
         async function deleteUser(userId) {
             if (!confirm('确定要删除该用户吗？该用户的所有评论也会被删除！')) return;
             const token = getToken();
