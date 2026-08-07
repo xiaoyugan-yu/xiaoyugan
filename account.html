@@ -153,40 +153,16 @@
       }
     });
 
-    // ========== 登录（使用 location.replace 强制跳转） ==========
-    document.getElementById('login-submit').addEventListener('click', async function() {
-      const username = document.getElementById('login-username').value.trim();
-      const password = document.getElementById('login-password').value;
-      const msgDiv = document.getElementById('login-message');
-      
-      if (!username || !password) {
-        return showMessage(msgDiv, '请输入用户名和密码');
-      }
-
-      try {
-        const res = await fetch(`${API_BASE}/api/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ username, password })
-        });
-        const data = await res.json();
-        console.log('登录响应:', data);
-        
-        if (res.ok) {
-          showMessage(msgDiv, '登录成功！正在跳转...', false);
-          // 使用 location.replace 强制跳转
-          setTimeout(() => {
-            window.location.replace('https://xiaoyugan.qzz.io/admin.html');
-          }, 800);
-        } else {
-          showMessage(msgDiv, data.msg || '登录失败');
-        }
-      } catch (err) {
-        console.error('登录错误:', err);
-        showMessage(msgDiv, '网络错误');
-      }
-    });
+    if (res.ok) {
+  const token = data.access_token;
+  localStorage.setItem('access_token', token);
+  
+  showMessage(msgDiv, '登录成功！', false);
+  setTimeout(() => {
+    // 跳转到自己写的后台页面，不是 pythonanywhere
+    window.location.href = 'https://xiaoyugan.qzz.io/admin.html';
+  }, 500);
+}
   </script>
 </body>
 </html>
