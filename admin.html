@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>后台管理 - 小鱼干的网站</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .admin-container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 1rem;
+        }
+        .admin-card {
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .admin-table th, .admin-table td {
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            text-align: left;
+        }
+        .admin-table th {
+            background: var(--accent);
+            color: white;
+        }
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .delete-btn:hover {
+            background: #dc2626;
+        }
+        .logout-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .nav-bar a {
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <a class="logo" href="index.html">小鱼干的个人网站</a>
+            <nav class="main-nav">
+                <a href="index.html">首页</a>
+                <a href="about.html">关于</a>
+                <a href="works.html">作品</a>
+                <a href="contact.html">联系</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="admin-container" id="adminApp">
+            <div class="nav-bar">
+                <h1>🔐 后台管理</h1>
+                <div>
+                    <span id="adminUser" style="margin-right: 1rem;"></span>
+                    <button class="logout-btn" onclick="logout()">登出</button>
+                </div>
+            </div>
+
+            <div id="loginRequired" style="display: none; text-align: center; padding: 3rem;">
+                <p>请先 <a href="account.html">登录</a> 或 <a href="account.html">注册</a></p>
+            </div>
+
+            <div id="adminContent">
+                <!-- 用户管理 -->
+                <div class="admin-card">
+                    <h2>👤 用户管理</h2>
+                    <div id="userList">加载中...</div>
+                </div>
+
+                <!-- 评论管理 -->
+                <div class="admin-card">
+                    <h2>💬 评论管理</h2>
+                    <div id="commentList">加载中...</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <small>© 2026 小鱼干。保留所有权利。</small>
+        </div>
+    </footer>
+
+    <script>
+        const API_BASE = 'https://xiaoyugan.pythonanywhere.com';
+        let currentUser = null;
+
+        // 检查登录状态
+        async function checkAuth() {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                document.getElementById('loginRequired').style.display = 'block';
+                document.getElementById('adminContent').style.display = 'none';
+                return false;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/api/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    currentUser = data;
+                    document.getElementById('adminUser').textContent = `👋 ${data.username}`;
+
+                    if (!data.is_admin) {
+                        document.getElementById('loginRequired').style.display = 'block';
+                        document.getElementById('adminContent').style.display = 'none';
+                        document.getElementById('loginRequired').innerHTML = '<p>❌ 您不是管理员，无权访问后台</p>';
+                        return false;
+                    }
+
+                    document.getElementById('loginRequired').style.display = 'none';
+                    document.getElementById('adminContent').style.display = 'block';
+                    loadUsers();
+                    loadComments();
+                    return true;
+                } else {
+                    throw new Error('认证失败');
+                }
+            } catch (err) {
+                document.getElementById('loginRequired').style.display = 'block';
+                document.getElementById('adminContent').style.display = 'none';
+                return false;
+            }
+        }
+
+        // 加载用户列表
+        async function loadUsers() {
+            const token = localStorage.getItem('access_token');
+            try {
+                const res = await fetch(`${API_BASE}/api/users`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const users = await res.json();
+                    document.getElementById('userList').innerHTML = `
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>用户名</th>
+                                    <th>管理员</th>
+                                    <th>注册时间</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${users.map(u => `
+                                    <tr>
+                                        <td>${u.id}</td>
+                                        <td>${u.username}</td>
+                                        <td>${u.is_admin ? '✅ 是' : '❌ 否'}</td>
+                                        <td>${u.created_at ? new Date(u.created_at).toLocaleString() : '-'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                } else {
+                    document.getElementById('userList').textContent = '加载失败';
+                }
+            } catch (err) {
+                document.getElementById('userList').textContent = '加载失败';
+            }
+        }
+
+        // 加载评论列表
+        async function loadComments() {
+            const token = localStorage.getItem('access_token');
+            try {
+                const res = await fetch(`${API_BASE}/api/comments`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const comments = await res.json();
+                    document.getElementById('commentList').innerHTML = `
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>用户</th>
+                                    <th>内容</th>
+                                    <th>时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${comments.map(c => `
+                                    <tr>
+                                        <td>${c.id}</td>
+                                        <td>${c.username}</td>
+                                        <td>${c.content}</td>
+                                        <td>${new Date(c.created_at).toLocaleString()}</td>
+                                        <td>
+                                            <button class="delete-btn" onclick="deleteComment(${c.id})">删除</button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                } else {
+                    document.getElementById('commentList').textContent = '加载失败';
+                }
+            } catch (err) {
+                document.getElementById('commentList').textContent = '加载失败';
+            }
+        }
+
+        // 删除评论
+        async function deleteComment(id) {
+            if (!confirm('确定要删除这条评论吗？')) return;
+            const token = localStorage.getItem('access_token');
+            try {
+                const res = await fetch(`${API_BASE}/api/comments/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    alert('删除成功！');
+                    loadComments();
+                } else {
+                    alert('删除失败');
+                }
+            } catch (err) {
+                alert('网络错误');
+            }
+        }
+
+        // 登出
+        function logout() {
+            localStorage.removeItem('access_token');
+            window.location.href = 'account.html';
+        }
+
+        // 页面加载时检查
+        checkAuth();
+    </script>
+</body>
+</html>
