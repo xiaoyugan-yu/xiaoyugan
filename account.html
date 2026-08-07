@@ -125,8 +125,8 @@
       document.getElementById('loginForm').style.display = 'none';
     });
 
-    // 注册
-    document.getElementById('register-submit').addEventListener('click', async () => {
+    // ========== 注册 ==========
+    document.getElementById('register-submit').addEventListener('click', async function() {
       const username = document.getElementById('reg-username').value.trim();
       const password = document.getElementById('reg-password').value;
       const msgDiv = document.getElementById('register-message');
@@ -134,13 +134,13 @@
       if (password.length < 4) return showMessage(msgDiv, '密码至少4个字符');
 
       try {
-        const res = await fetch(`${API_BASE}/api/register`, {
+        const response = await fetch(`${API_BASE}/api/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password })
         });
-        const data = await res.json();
-        if (res.ok) {
+        const data = await response.json();
+        if (response.ok) {
           showMessage(msgDiv, '注册成功！请登录', false);
           document.getElementById('reg-username').value = '';
           document.getElementById('reg-password').value = '';
@@ -153,16 +153,41 @@
       }
     });
 
-    if (res.ok) {
-  const token = data.access_token;
-  localStorage.setItem('access_token', token);
-  
-  showMessage(msgDiv, '登录成功！', false);
-  setTimeout(() => {
-    // 跳转到自己写的后台页面，不是 pythonanywhere
-    window.location.href = 'https://xiaoyugan.qzz.io/admin.html';
-  }, 500);
-}
+    // ========== 登录 ==========
+    document.getElementById('login-submit').addEventListener('click', async function() {
+      const username = document.getElementById('login-username').value.trim();
+      const password = document.getElementById('login-password').value;
+      const msgDiv = document.getElementById('login-message');
+      
+      if (!username || !password) {
+        return showMessage(msgDiv, '请输入用户名和密码');
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/api/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ username, password })
+        });
+        const data = await response.json();
+        
+        if (response.ok) {
+          // 保存 token
+          localStorage.setItem('access_token', data.access_token);
+          showMessage(msgDiv, '登录成功！正在跳转...', false);
+          // 跳转到自己写的后台页面
+          setTimeout(() => {
+            window.location.href = 'https://xiaoyugan.qzz.io/admin.html';
+          }, 500);
+        } else {
+          showMessage(msgDiv, data.msg || '登录失败');
+        }
+      } catch (err) {
+        console.error('登录错误:', err);
+        showMessage(msgDiv, '网络错误，请检查后端是否运行');
+      }
+    });
   </script>
 </body>
 </html>
