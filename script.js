@@ -152,7 +152,9 @@ if (themeToggle) {
   });
 }
 
-// ========== 评论系统（带跳转到独立登录页） ==========
+
+  
+  // ========== 评论系统（支持回复） ==========
 const API_BASE = 'https://xiaoyugan.pythonanywhere.com';
 let authToken = localStorage.getItem('access_token');
 let currentUsername = '';
@@ -185,6 +187,41 @@ function showCommentStatus(msg, isError = false) {
   }
 }
 
+// ========== 渲染评论树 ==========
+function renderComment(comment, depth = 0) {
+  const indent = depth * 20;
+  const isReply = depth > 0;
+  
+  return `
+    <div class="comment-item" style="margin-left: ${indent}px; ${isReply ? 'border-left: 2px solid var(--accent); padding-left: 12px; margin-top: 8px;' : ''}">
+      <div class="card" style="margin-bottom: 0.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <strong>${escapeHtml(comment.username)}</strong>
+          <small style="color: var(--text-muted);">${new Date(comment.created_at).toLocaleString()}</small>
+        </div>
+        <p style="margin: 0.3rem 0;">${escapeHtml(comment.content)}</p>
+        <div style="display: flex; gap: 0.5rem; margin-top: 0.3rem; align-items: center;">
+          <button class="reply-btn btn" data-id="${comment.id}" style="padding: 0.1rem 0.5rem; font-size: 0.7rem; background: transparent; color: var(--accent); border: 1px solid var(--accent);">💬 回复</button>
+          ${comment.username === currentUsername ? 
+            `<button class="delete-comment-btn" data-id="${comment.id}" style="background: none; border: none; color: #f87171; cursor: pointer; font-size: 0.7rem;">删除</button>` : 
+            ''}
+          ${comment.replies && comment.replies.length > 0 ? 
+            `<span style="color: var(--text-muted); font-size: 0.7rem;">${comment.replies.length} 条回复</span>` :
+            ''}
+        </div>
+        <!-- 回复表单 -->
+        <div id="reply-form-${comment.id}" style="display: none; margin-top: 0.5rem;">
+          <textarea id="reply-input-${comment.id}" class="reply-input" rows="2" placeholder="写下你的回复..." style="width: 100%; padding: 0.4rem; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text);"></textarea>
+          <button class="submit-reply btn" data-id="${comment.id}" style="padding: 0.2rem 0.8rem; font-size: 0.8rem; margin-top: 0.3rem;">提交回复</button>
+        </div>
+      </div>
+      ${comment.replies && comment.replies.length > 0 ? 
+        comment.replies.map(r => renderComment(r, depth + 1)).join('') : 
+        ''}
+    </div>
+  `;
+}
+
 async function loadComments() {
   try {
     const res = await apiCall('/api/comments');
@@ -192,18 +229,66 @@ async function loadComments() {
     const comments = await res.json();
     const container = document.getElementById('comments-list');
     if (!container) return;
+    
     if (comments.length === 0) {
       container.innerHTML = '<p>还没有评论，快来抢沙发～</p>';
       return;
     }
-    container.innerHTML = comments.map(c => `
-      <div class="card">
-        <strong>${escapeHtml(c.username)}</strong>
-        <small style="color: var(--text-muted);">${new Date(c.created_at).toLocaleString()}</small>
-        <p>${escapeHtml(c.content)}</p>
-        ${c.username === currentUsername ? `<button class="delete-comment-btn" data-id="${c.id}">删除</button>` : ''}
-      </div>
-    `).join('');
+    
+    container.innerHTML = comments.map(c => renderComment(c)).join('');
+    
+    // 绑定回复按钮事件
+    document.querySelectorAll('.reply-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const commentId = this.dataset.id;
+        const replyForm = document.getElementById(`reply-form-${commentId}`);
+        if (replyForm) {
+          const isHidden = replyForm.style.display === 'none';
+          // 隐藏其他回复表单
+          document.querySelectorAll('.reply-form').forEach(f => {
+            if (f.id !== `reply-form-${commentId}`) {
+              f.style.display = 'none';
+            }
+          });
+          replyForm.style.display = isHidden ? 'block' : 'none';
+          if (isHidden) {
+            replyForm.querySelector('.reply-input').focus();
+          }
+        }
+      });
+    });
+    
+    // 绑定提交回复事件
+    document.querySelectorAll('.submit-reply').forEach(btn => {
+      btn.addEventListener('click', async function() {
+        const commentId = this.dataset.id;
+        const input = document.getElementById(`reply-input-${commentId}`);
+        const content = input.value.trim();
+        if (!content) return showCommentStatus('请输入回复内容', true);
+        
+        if (!authToken) {
+          window.location.href = 'account.html';
+          return;
+        }
+        
+        const res = await apiCall('/api/comments', {
+          method: 'POST',
+          body: JSON.stringify({ content, parent_id: parseInt(commentId) })
+        });
+        
+        if (res.ok) {
+          input.value = '';
+          document.getElementById(`reply-form-${commentId}`).style.display = 'none';
+          showCommentStatus('回复成功！');
+          loadComments();
+        } else {
+          const data = await res.json();
+          showCommentStatus(data.msg || '回复失败', true);
+        }
+      });
+    });
+    
+    // 绑定删除评论事件
     document.querySelectorAll('.delete-comment-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = btn.dataset.id;
@@ -218,12 +303,14 @@ async function loadComments() {
         }
       });
     });
+    
   } catch (err) {
     console.error(err);
     showCommentStatus('无法加载评论，请检查后端服务是否启动', true);
   }
 }
 
+// ========== 登录状态检测 ==========
 async function updateUIByAuth() {
   if (authToken) {
     try {
@@ -247,7 +334,6 @@ async function updateUIByAuth() {
     }
   }
   
-  // 未登录状态：隐藏发表评论面板，显示登录提示
   const loggedinPanel = document.getElementById('loggedin-panel');
   if (loggedinPanel) loggedinPanel.style.display = 'none';
   
@@ -266,7 +352,7 @@ async function updateUIByAuth() {
   loadComments();
 }
 
-// 发表评论（需要登录）
+// ========== 发表评论 ==========
 document.getElementById('submit-comment')?.addEventListener('click', async () => {
   if (!authToken) {
     window.location.href = 'account.html';
@@ -275,7 +361,8 @@ document.getElementById('submit-comment')?.addEventListener('click', async () =>
   const content = document.getElementById('new-comment').value.trim();
   if (!content) return showCommentStatus('评论内容不能为空', true);
   const res = await apiCall('/api/comments', {
-    method: 'POST', body: JSON.stringify({ content }),
+    method: 'POST',
+    body: JSON.stringify({ content, parent_id: null })
   });
   if (res.ok) {
     document.getElementById('new-comment').value = '';
@@ -287,7 +374,7 @@ document.getElementById('submit-comment')?.addEventListener('click', async () =>
   }
 });
 
-// 登出
+// ========== 登出 ==========
 document.getElementById('logout-btn')?.addEventListener('click', () => {
   localStorage.removeItem('access_token');
   authToken = null;
@@ -295,7 +382,7 @@ document.getElementById('logout-btn')?.addEventListener('click', () => {
   updateUIByAuth();
 });
 
-// 启动评论系统
+// ========== 启动评论系统 ==========
 if (document.getElementById('comment-app')) {
   updateUIByAuth();
 }
