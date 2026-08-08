@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>文章 - 小鱼干的网站</title>
+  <link rel="icon" type="image/svg+xml" href="images/Favicon.svg" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="logo" href="index.html">小鱼干的个人网站</a>
+      <button id="navToggle" class="nav-toggle">☰</button>
+      <nav id="mainNav" class="main-nav">
+        <a href="index.html">首页</a>
+        <a href="about.html">关于</a>
+        <a href="works.html">作品</a>
+        <a href="articles.html">文章</a>
+        <a href="contact.html">联系</a>
+        <button id="themeToggle" class="theme-toggle">🌙</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="container section">
+      <h1>📝 文章</h1>
+      <p>记录我的学习心得和项目经验。</p>
+      <div id="articles-list" class="grid" style="margin-top: 1rem;"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <small>© 2026 小鱼干。保留所有权利。</small>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  <script>
+    const API_BASE = 'https://xiaoyugan.pythonanywhere.com';
+
+    async function loadArticles() {
+      const container = document.getElementById('articles-list');
+      try {
+        const res = await fetch(`${API_BASE}/api/articles`);
+        if (!res.ok) throw new Error();
+        const articles = await res.json();
+        if (articles.length === 0) {
+          container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">暂无文章</p>';
+          return;
+        }
+        container.innerHTML = articles.map(a => `
+          <article class="card">
+            ${a.cover_image ? `<img src="${a.cover_image}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 0.5rem;" />` : ''}
+            <h3><a href="article.html?id=${a.id}" style="color: var(--text); text-decoration: none;">${a.title}</a></h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">${a.summary || '...'}</p>
+            <small style="color: var(--text-muted);">${a.author} · ${new Date(a.created_at).toLocaleString()}</small>
+          </article>
+        `).join('');
+      } catch (err) {
+        container.innerHTML = '<p style="color: var(--text-muted);">加载失败</p>';
+      }
+    }
+
+    loadArticles();
+  </script>
+</body>
+</html>
