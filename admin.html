@@ -76,6 +76,18 @@
         .btn-warning:hover {
             background: #d97706;
         }
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.4rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
         .nav-bar {
             display: flex;
             justify-content: space-between;
@@ -108,6 +120,20 @@
             border-radius: 999px;
             font-size: 0.7rem;
         }
+        .badge-published {
+            background: #22c55e;
+            color: white;
+            padding: 0.1rem 0.5rem;
+            border-radius: 999px;
+            font-size: 0.7rem;
+        }
+        .badge-draft {
+            background: #f59e0b;
+            color: white;
+            padding: 0.1rem 0.5rem;
+            border-radius: 999px;
+            font-size: 0.7rem;
+        }
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -132,7 +158,6 @@
         .stat-green { background: #22c55e; }
         .stat-orange { background: #f59e0b; }
         .stat-purple { background: #8b5cf6; }
-        .stat-red { background: #ef4444; }
         .trend-chart {
             display: flex;
             gap: 3px;
@@ -165,6 +190,66 @@
             font-size: 0.5rem;
             color: var(--text-muted);
         }
+
+        /* 文章编辑器弹窗 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        .modal-overlay.active {
+            display: block;
+        }
+        .modal-content {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--bg-end);
+            padding: 2rem;
+            border-radius: 12px;
+        }
+        .modal-content input,
+        .modal-content textarea {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text);
+        }
+        .modal-content textarea {
+            min-height: 200px;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        .modal-actions .btn {
+            padding: 0.5rem 1.5rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            color: white;
+        }
+        .modal-actions .btn-save {
+            background: var(--accent);
+        }
+        .modal-actions .btn-publish {
+            background: #22c55e;
+        }
+        .modal-actions .btn-cancel {
+            background: #6c757d;
+        }
+
         @media (max-width: 700px) {
             .admin-table {
                 font-size: 0.7rem;
@@ -174,6 +259,12 @@
             }
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
+            }
+            .modal-overlay {
+                padding: 1rem;
+            }
+            .modal-content {
+                padding: 1rem;
             }
         }
     </style>
@@ -187,7 +278,9 @@
                 <a href="index.html">首页</a>
                 <a href="about.html">关于</a>
                 <a href="works.html">作品</a>
+                <a href="articles.html">文章</a>
                 <a href="contact.html">联系</a>
+                <a href="account.html" style="color: var(--accent); font-weight: bold;">登录/注册</a>
             </nav>
         </div>
     </header>
@@ -209,10 +302,11 @@
 
             <div id="notAdmin" style="display: none; text-align: center; padding: 3rem; background: var(--card-bg); border-radius: 12px;">
                 <p>❌ 您不是管理员，无权访问后台</p>
+                <p style="margin-top: 1rem;" id="redirectMsg">3 秒后跳转到首页...</p>
             </div>
 
             <div id="adminContent">
-                <!-- 访问统计 -->
+                <!-- ========== 访问统计 ========== -->
                 <div class="admin-card">
                     <h2>📊 访问统计</h2>
                     <div class="stats-grid" id="statsOverview">
@@ -243,13 +337,20 @@
                     </div>
                 </div>
 
-                <!-- 用户管理 -->
+                <!-- ========== 文章管理 ========== -->
+                <div class="admin-card">
+                    <h2>📝 文章管理</h2>
+                    <button id="newArticleBtn" class="btn-primary" style="margin-bottom: 1rem;">➕ 写新文章</button>
+                    <div id="articleList"><div class="loading">加载中...</div></div>
+                </div>
+
+                <!-- ========== 用户管理 ========== -->
                 <div class="admin-card">
                     <h2>👤 用户管理</h2>
                     <div id="userList"><div class="loading">加载中...</div></div>
                 </div>
 
-                <!-- 评论管理 -->
+                <!-- ========== 评论管理 ========== -->
                 <div class="admin-card">
                     <h2>💬 评论管理</h2>
                     <div id="commentList"><div class="loading">加载中...</div></div>
@@ -257,6 +358,27 @@
             </div>
         </div>
     </main>
+
+    <!-- ========== 文章编辑器弹窗 ========== -->
+    <div class="modal-overlay" id="articleModal">
+        <div class="modal-content">
+            <h2 id="editorTitle">✏️ 写新文章</h2>
+            <input type="text" id="articleTitle" placeholder="文章标题" />
+            <input type="text" id="articleSummary" placeholder="文章摘要（可选）" />
+            <textarea id="articleContent" placeholder="文章内容..."></textarea>
+            <div style="margin-top: 0.5rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="articlePublished" /> 发布
+                </label>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-save" id="saveArticleBtn">💾 保存</button>
+                <button class="btn btn-publish" id="publishArticleBtn">🚀 发布</button>
+                <button class="btn btn-cancel" id="closeEditorBtn">取消</button>
+            </div>
+            <div id="editorMsg" style="margin-top: 0.5rem; color: #86efac;"></div>
+        </div>
+    </div>
 
     <footer class="site-footer">
         <div class="container">
@@ -267,11 +389,13 @@
     <script>
         const API_BASE = 'https://xiaoyugan.pythonanywhere.com';
         let currentUser = null;
+        let editingArticleId = null;
 
         function getToken() {
             return localStorage.getItem('access_token');
         }
 
+        // ========== 认证检查 ==========
         async function checkAuth() {
             const token = getToken();
             if (!token) {
@@ -293,6 +417,18 @@
                         document.getElementById('loginRequired').style.display = 'none';
                         document.getElementById('notAdmin').style.display = 'block';
                         document.getElementById('adminContent').style.display = 'none';
+                        // 3秒后跳转首页
+                        let count = 3;
+                        const msgEl = document.getElementById('redirectMsg');
+                        const interval = setInterval(() => {
+                            count--;
+                            if (count <= 0) {
+                                clearInterval(interval);
+                                window.location.href = 'https://xiaoyugan.qzz.io/index.html';
+                            } else {
+                                msgEl.textContent = `${count} 秒后跳转到首页...`;
+                            }
+                        }, 1000);
                         return;
                     }
 
@@ -302,6 +438,7 @@
                     
                     loadStats();
                     loadPageStats();
+                    loadArticles();
                     loadUsers();
                     loadComments();
                 } else {
@@ -370,6 +507,211 @@
                 }
             } catch (err) {
                 console.error('加载页面统计失败:', err);
+            }
+        }
+
+        // ========== 文章管理 ==========
+        async function loadArticles() {
+            const token = getToken();
+            const container = document.getElementById('articleList');
+            try {
+                const res = await fetch(`${API_BASE}/api/admin/articles`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const articles = await res.json();
+                    if (articles.length === 0) {
+                        container.innerHTML = '<div class="empty">暂无文章</div>';
+                        return;
+                    }
+                    container.innerHTML = `
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>标题</th>
+                                    <th>状态</th>
+                                    <th>创建时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${articles.map(a => `
+                                    <tr>
+                                        <td>${a.id}</td>
+                                        <td>${a.title}</td>
+                                        <td><span class="${a.is_published ? 'badge-published' : 'badge-draft'}">${a.is_published ? '✅ 已发布' : '📝 草稿'}</span></td>
+                                        <td>${new Date(a.created_at).toLocaleString()}</td>
+                                        <td>
+                                            <button class="btn-warning" onclick="editArticle(${a.id})">✏️ 编辑</button>
+                                            <button class="btn-danger" onclick="deleteArticle(${a.id})">🗑️ 删除</button>
+                                            <button class="btn-success" onclick="togglePublish(${a.id}, ${a.is_published})">
+                                                ${a.is_published ? '📥 撤回' : '🚀 发布'}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                } else {
+                    container.innerHTML = '<div class="empty">加载失败</div>';
+                }
+            } catch (err) {
+                container.innerHTML = '<div class="empty">网络错误</div>';
+            }
+        }
+
+        // 打开文章编辑器
+        function openEditor(article = null) {
+            const modal = document.getElementById('articleModal');
+            const title = document.getElementById('articleTitle');
+            const summary = document.getElementById('articleSummary');
+            const content = document.getElementById('articleContent');
+            const published = document.getElementById('articlePublished');
+            const editorTitle = document.getElementById('editorTitle');
+            const msg = document.getElementById('editorMsg');
+
+            msg.textContent = '';
+            if (article) {
+                editingArticleId = article.id;
+                title.value = article.title || '';
+                summary.value = article.summary || '';
+                content.value = article.content || '';
+                published.checked = article.is_published || false;
+                editorTitle.textContent = '✏️ 编辑文章';
+            } else {
+                editingArticleId = null;
+                title.value = '';
+                summary.value = '';
+                content.value = '';
+                published.checked = false;
+                editorTitle.textContent = '✏️ 写新文章';
+            }
+            modal.classList.add('active');
+        }
+
+        // 关闭编辑器
+        function closeEditor() {
+            document.getElementById('articleModal').classList.remove('active');
+            editingArticleId = null;
+        }
+
+        // 保存文章
+        async function saveArticle(publish = false) {
+            const token = getToken();
+            const title = document.getElementById('articleTitle').value.trim();
+            const summary = document.getElementById('articleSummary').value.trim();
+            const content = document.getElementById('articleContent').value.trim();
+            const is_published = publish || document.getElementById('articlePublished').checked;
+            const msg = document.getElementById('editorMsg');
+
+            if (!title || !content) {
+                msg.textContent = '⚠️ 标题和内容不能为空';
+                msg.style.color = '#f87171';
+                return;
+            }
+
+            const method = editingArticleId ? 'PUT' : 'POST';
+            const url = editingArticleId 
+                ? `${API_BASE}/api/admin/articles/${editingArticleId}`
+                : `${API_BASE}/api/admin/articles`;
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ title, summary, content, is_published })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    msg.textContent = `✅ ${publish ? '发布' : '保存'}成功！`;
+                    msg.style.color = '#86efac';
+                    setTimeout(() => {
+                        closeEditor();
+                        loadArticles();
+                    }, 1000);
+                } else {
+                    msg.textContent = '❌ ' + (data.msg || '操作失败');
+                    msg.style.color = '#f87171';
+                }
+            } catch (err) {
+                msg.textContent = '❌ 网络错误';
+                msg.style.color = '#f87171';
+            }
+        }
+
+        // 编辑文章
+        async function editArticle(id) {
+            const token = getToken();
+            try {
+                const res = await fetch(`${API_BASE}/api/admin/articles`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const articles = await res.json();
+                    const article = articles.find(a => a.id === id);
+                    if (article) {
+                        // 需要获取完整内容
+                        const detailRes = await fetch(`${API_BASE}/api/articles/${id}`);
+                        if (detailRes.ok) {
+                            const detail = await detailRes.json();
+                            openEditor({ ...article, content: detail.content });
+                            return;
+                        }
+                        openEditor(article);
+                    }
+                }
+            } catch (err) {
+                alert('加载文章失败');
+            }
+        }
+
+        // 删除文章
+        async function deleteArticle(id) {
+            if (!confirm('确定要删除这篇文章吗？')) return;
+            const token = getToken();
+            try {
+                const res = await fetch(`${API_BASE}/api/admin/articles/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert(data.msg || '删除成功');
+                    loadArticles();
+                } else {
+                    alert(data.msg || '删除失败');
+                }
+            } catch (err) {
+                alert('网络错误');
+            }
+        }
+
+        // 切换发布状态
+        async function togglePublish(id, currentStatus) {
+            const token = getToken();
+            try {
+                const res = await fetch(`${API_BASE}/api/admin/articles/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ is_published: !currentStatus })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert(data.msg || '操作成功');
+                    loadArticles();
+                } else {
+                    alert(data.msg || '操作失败');
+                }
+            } catch (err) {
+                alert('网络错误');
             }
         }
 
@@ -540,7 +882,18 @@
             window.location.href = 'account.html';
         }
 
-        // 页面加载
+        // ========== 事件绑定 ==========
+        document.getElementById('newArticleBtn').addEventListener('click', () => openEditor());
+        document.getElementById('closeEditorBtn').addEventListener('click', closeEditor);
+        document.getElementById('saveArticleBtn').addEventListener('click', () => saveArticle(false));
+        document.getElementById('publishArticleBtn').addEventListener('click', () => saveArticle(true));
+
+        // 点击遮罩关闭弹窗
+        document.getElementById('articleModal').addEventListener('click', function(e) {
+            if (e.target === this) closeEditor();
+        });
+
+        // ========== 启动 ==========
         checkAuth();
     </script>
 </body>
