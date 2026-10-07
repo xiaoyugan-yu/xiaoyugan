@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="打枪游戏详情 - 一个3D第一人称射击游戏，用Ursina引擎开发。" />
+  <title>打枪游戏 - 小鱼干的网站</title>
+  <link rel="icon" type="image/svg+xml" href="images/Favicon.svg" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="logo" href="index.html">小鱼干的个人网站</a>
+      <button id="navToggle" class="nav-toggle">☰</button>
+      <nav id="mainNav" class="main-nav">
+        <a href="index.html">首页</a>
+        <a href="about.html">关于</a>
+        <a href="works.html">作品</a>
+        <a href="articles.html">文章</a>
+        <a href="contact.html">联系</a>
+        <a href="account.html" style="color: var(--accent); font-weight: bold;">登录/注册</a>
+        <button id="themeToggle" class="theme-toggle">🌙</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="container section">
+      <h1>🔫 打枪游戏 (Shooter)</h1>
+      <p>一个 3D 第一人称射击游戏，用 Ursina 引擎 + Python 开发。</p>
+
+      <h2>📷 项目截图</h2>
+      <p>无</p>
+
+      <h2>🎮 玩法说明</h2>
+      <ul>
+        <li><strong>WASD</strong>：移动</li>
+        <li><strong>空格</strong>：跳跃</li>
+        <li><strong>鼠标左键</strong>：射击</li>
+        <li><strong>R</strong>：换弹</li>
+        <li><strong>Q/E</strong> 或滚轮：切换武器</li>
+        <li><strong>ESC</strong>：暂停</li>
+      </ul>
+
+      <h2>🔫 武器系统</h2>
+      <ul>
+        <li><strong>Pistol</strong>：手枪，伤害 30，射速中等</li>
+        <li><strong>Rifle</strong>：步枪，伤害 25，射速快</li>
+        <li><strong>Shotgun</strong>：霰弹枪，伤害 20，射速慢</li>
+      </ul>
+
+      <h2>👾 敌人类型</h2>
+      <ul>
+        <li><strong>Normal</strong>：普通敌人，速度血量均衡</li>
+        <li><strong>Fast</strong>：快速敌人，速度快但血量低</li>
+        <li><strong>Tank</strong>：坦克敌人，血厚但速度慢</li>
+        <li><strong>Ranged</strong>：远程敌人，会远距离攻击</li>
+      </ul>
+
+      <h2>⬇️ 下载游戏</h2>
+      <p>点击下方按钮下载游戏（Windows 版），解压后双击 <code>main.exe</code> 即可运行。</p>
+      <a class="btn" href="https://github.com/xiaoyugan-yu/xiaoyugan/releases/download/v1.0/shooting-gameV1.0.zip">⬇️ 下载游戏（Windows）</a>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.5rem;">
+        ⚠️ 如果杀毒软件误报，请允许运行。
+      </p>
+
+      <h2>📝 开发心得</h2>
+      <p>这是我用 Ursina 引擎做的第一个 3D 射击游戏。过程中学会了第一人称控制器、射线检测、波次系统和 UI 设计。未来打算添加更多武器、地图和 boss。</p>
+
+      <div style="margin-top: 2rem;">
+        <a class="btn" href="works.html">← 返回作品列表</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <small>© 2026 小鱼干。保留所有权利。</small>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
